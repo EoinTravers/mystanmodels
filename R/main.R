@@ -47,6 +47,7 @@ load_stanmodel = function(model_name,
   if(force_recompile){
     message(sprintf("Trying to recompile model '%s'.", model_name))
     .remove_compiled_model(model_name) # Delete old .rds file
+    model = .compile_stanmodel(model_name)
   } else {
     rds_file = file.path(.stan_folder, paste0(model_name, '.rds'))
     if(file.exists(rds_file)){
@@ -54,19 +55,20 @@ load_stanmodel = function(model_name,
       message(sprintf("Loading compiled model '%s'.", model_name))
       mtime = file.info(rds_file)$mtime
       message('Compilation date: ', mtime)
+      model = readRDS(rds_file)
     } else {
       if(avoid_recompile){
         stop('Model not compiled, and avoid_recompile is set to TRUE.')
       } else {
         message(sprintf("Compiling model '%s' for the first time.", model_name))
+        model = .compile_stanmodel(model_name)
       }
     }
   }
-  model = .get_stanmodel(model_name)
   return(model)
 }
 
-.get_stanmodel = function(model_name){
+.compile_stanmodel = function(model_name){
   # Compile model, or load it if already saved.
   file_name = paste0(model_name, '.stan')
   fp = file.path(.stan_folder, file_name)
@@ -74,7 +76,7 @@ load_stanmodel = function(model_name,
     stop(sprintf("Model '%s' not found in %s", model_name, .stan_folder))
   }
   model = rstan::stan_model(file=fp, model_name=model_name,
-                            auto_write = TRUE, save_dso = FALSE)
+                            auto_write = TRUE, save_dso = TRUE)
   return(model)
 }
 

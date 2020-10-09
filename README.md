@@ -24,6 +24,27 @@ e.g. `~/stanmodels/sdt/equal_variance.stan`
 
 ### Use models
 
+For this example,
+the following stan file has been saved as 
+`~/stanmodels/simple_lm.stan`.
+
+```stan
+data {
+  int<lower=0> N;   // number of data points
+  int<lower=0> K;   // number of predictors
+  matrix[N, K] X;   // predictor matrix (excluding intercept)
+  vector[N] y;      // outcome vector
+}
+parameters {
+  real alpha;           // intercept
+  vector[K] beta;       // coefficients for predictors
+  real<lower=0> sigma;  // error scale
+}
+model {
+  y ~ normal(X * beta + alpha, sigma);  // likelihood
+}
+```
+
 ```r
 library(rstan)
 library(mystanmodels)
